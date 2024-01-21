@@ -4,19 +4,31 @@ class Task extends Component{
     static template = xml`
     <li t-attf-style="background-color:#{props.task.color}" class="d-flex align-item-center justify-content-between border p-3 mb-2 rounded">
         <div class="form-check form-switch fs5">
-            <input class="form-check-input" type="checkbox" value="" t-att-id="props.task.id" />
-            <label class="form-check-label" t-att-for="props.task.id">
+
+            <input class="form-check-input" type="checkbox" value="" 
+            t-att-checked="props.task.isCompleted" t-att-id="props.task.id" t-on-click="toggleTask" />
+
+            <label class="form-check-label" t-att-for="props.task.id" 
+            t-attf-class="#{props.task.isCompleted ? 'text-decoration-line-through':''}">
+    
                 <t t-esc="props.task.name"/>
             </label>
         </div>
         <div>
             <button class="btn btn-primary me-2"><i class="bi bi-pencil "> </i></button>
-            <button class="btn btn-danger"><i class="bi bi-trash "> </i></button>
+            <button class="btn btn-danger" t-on-click="deleteTask"><i class="bi bi-trash "> </i></button>
         </div>
     </li>
     `
 
-    static props = ["task"]
+    static props = ["task", "onDelete"]
+
+    toggleTask(){
+        this.props.task.isCompleted = !this.props.task.isCompleted
+    }
+    deleteTask(){
+        this.props.onDelete(this.props.task)
+    }
 }
 
 class Root extends Component {
@@ -36,7 +48,7 @@ class Root extends Component {
     <ul class="d-flex flex-column mt-5 p-0">
         <t t-foreach="tasks" t-as="task" t-key="task.id">
 
-            <Task task="task"/>
+            <Task task="task" onDelete.bind="deleteTask"/>
         </t>
     </ul>
 
@@ -67,6 +79,11 @@ class Root extends Component {
         })
         let state =this.state
         this.state = {...state, name:"", color:"#FFF000"}
+
+    }
+    deleteTask(task) {
+        const index = this.tasks.findIndex(t=>t.id == task.id)
+        this.tasks.splice(index, 1)
 
     }
     
